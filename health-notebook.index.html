@@ -1,0 +1,751 @@
+<title>보건실 건강수첩</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+:root{
+  /* Layout: one phone-width column (max 480px) of soft cards on a pale clinic-blue ground, fixed bottom tab bar */
+  --bg:#F1F7FA; --surface:#FFFFFF; --surface-2:#F6FAFC; --ink:#1C3545; --muted:#587080; --line:#D8E5EC;
+  --primary:#2A84CC; --primary-ink:#FFFFFF; --primary-soft:#E1EFFA;
+  --mint:#23977A; --mint-soft:#DDF3EA;
+  --cool:#4A78D6; --cool-soft:#E5ECFB;
+  --warm:#B87412; --warm-soft:#FBEFD8;
+  --hot:#CC5244; --hot-soft:#FAE4E0;
+  --shadow:0 1px 2px rgba(28,53,69,.05),0 8px 22px rgba(28,53,69,.07);
+  --font-display:"Jua","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --font-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --r-lg:24px; --r-md:18px; --r-sm:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1A21; --surface:#15252E; --surface-2:#1A2C36; --ink:#E4EEF3; --muted:#98AFBC; --line:#26404E;
+    --primary:#5AAEEE; --primary-ink:#0E1A21; --primary-soft:#173449;
+    --mint:#5ACDA9; --mint-soft:#163A31;
+    --cool:#86A8F2; --cool-soft:#1D2C4D;
+    --warm:#EDB55A; --warm-soft:#3A2D16;
+    --hot:#F0897C; --hot-soft:#40231F;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1A21; --surface:#15252E; --surface-2:#1A2C36; --ink:#E4EEF3; --muted:#98AFBC; --line:#26404E;
+  --primary:#5AAEEE; --primary-ink:#0E1A21; --primary-soft:#173449;
+  --mint:#5ACDA9; --mint-soft:#163A31;
+  --cool:#86A8F2; --cool-soft:#1D2C4D;
+  --warm:#EDB55A; --warm-soft:#3A2D16;
+  --hot:#F0897C; --hot-soft:#40231F;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.6;padding-inline:16px;-webkit-tap-highlight-color:transparent}
+.app{max-width:480px;margin:0 auto;padding-block:14px calc(104px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:28px;line-height:1.3}
+h2{font-size:21px;line-height:1.35}
+h3{font-size:18px}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px;border-radius:10px}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:19px}
+.cross{width:36px;height:36px;border-radius:11px;background:var(--mint);display:grid;place-items:center;flex:none}
+.cross svg{width:20px;height:20px}
+.cross path{fill:var(--surface)}
+.datechip{font-size:14px;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:5px 12px;border-radius:999px;white-space:nowrap}
+
+.stack{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow)}
+.card-flat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.link{background:none;border:0;color:var(--primary);font-weight:700;font-size:15px;padding:6px 2px}
+
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:60px;border-radius:18px;border:0;font-family:var(--font-display);font-size:21px;padding:12px 18px;transition:transform .12s ease,filter .12s ease}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--primary);color:var(--primary-ink)}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-soft{background:var(--primary-soft);color:var(--primary)}
+.btn-ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.btn-danger{background:var(--hot);color:var(--surface)}
+.btn-sm{min-height:48px;font-size:17px;border-radius:14px}
+.btn .plus{font-size:26px;line-height:1}
+
+/* hero */
+.hello{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.hello p{color:var(--muted)}
+.today{position:relative;overflow:hidden}
+.today .bgcross{position:absolute;right:-18px;top:-18px;width:120px;height:120px;opacity:.5}
+.today .bgcross path{fill:var(--primary-soft)}
+.today-inner{position:relative;display:flex;flex-direction:column;gap:16px}
+.status-line{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.bignum{font-family:var(--font-display);font-size:56px;line-height:1;font-variant-numeric:tabular-nums}
+.bignum small{font-size:26px;margin-left:2px}
+.temprow{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:700;white-space:nowrap}
+.lv-low{background:var(--cool-soft);color:var(--cool)}
+.lv-ok{background:var(--mint-soft);color:var(--mint)}
+.lv-warm{background:var(--warm-soft);color:var(--warm)}
+.lv-hot{background:var(--hot-soft);color:var(--hot)}
+.bg-low{background:var(--cool)} .bg-ok{background:var(--mint)} .bg-warm{background:var(--warm)} .bg-hot{background:var(--hot)} .bg-none{background:var(--line)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-size:14px}
+
+.notice{display:flex;gap:12px;align-items:flex-start;border-radius:var(--r-md);padding:14px 16px;font-size:15px}
+.notice .ico{font-size:22px;line-height:1.2}
+.notice b{display:block;margin-bottom:2px}
+.notice.hot{background:var(--hot-soft);color:var(--ink)} .notice.hot b{color:var(--hot)}
+.notice.warm{background:var(--warm-soft);color:var(--ink)} .notice.warm b{color:var(--warm)}
+.notice.cool{background:var(--cool-soft);color:var(--ink)} .notice.cool b{color:var(--cool)}
+.notice.info{background:var(--primary-soft);color:var(--ink)} .notice.info b{color:var(--primary)}
+
+/* 7-day strip */
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.strip .d{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.strip .ball{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--surface);font-variant-numeric:tabular-nums}
+.strip .ball.bg-none{color:var(--muted);background:var(--surface-2);border:1.5px dashed var(--line)}
+.strip .d.is-today{color:var(--ink);font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+
+/* record screen */
+.step{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.step .n{width:28px;height:28px;border-radius:50%;background:var(--primary);color:var(--primary-ink);display:grid;place-items:center;font-family:var(--font-display);font-size:16px;flex:none}
+.thermo{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.round{width:60px;height:60px;border-radius:50%;border:0;background:var(--primary-soft);color:var(--primary);font-size:32px;font-family:var(--font-display);display:grid;place-items:center;flex:none}
+.round:active{transform:scale(.94)}
+.thermo-val{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.thermo-val .bignum{font-size:60px}
+input[type=range]{width:100%;accent-color:var(--primary);height:32px;margin:14px 0 2px}
+.scale{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.direct{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);font-size:15px;flex-wrap:wrap}
+.field{font:inherit;color:var(--ink);background:var(--surface-2);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;min-height:48px}
+.field:focus{border-color:var(--primary);outline:none}
+.direct .field{width:110px;font-size:18px;font-variant-numeric:tabular-nums}
+.err{color:var(--hot);font-size:14px;font-weight:700;margin-top:8px}
+
+.sym-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sym{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:96px;padding:10px 6px;border-radius:16px;border:2px solid var(--line);background:var(--surface);text-align:center;position:relative;transition:background .12s,border-color .12s}
+.sym .e{font-size:30px;line-height:1.15}
+.sym .t{font-weight:700;font-size:15px;line-height:1.3}
+.sym .h{font-size:12px;color:var(--muted);line-height:1.3}
+.sym[aria-pressed="true"]{border-color:var(--primary);background:var(--primary-soft)}
+.sym[aria-pressed="true"]::after{content:"✓";position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--primary);color:var(--primary-ink);font-size:12px;font-weight:700;display:grid;place-items:center}
+.sym.none{grid-column:1/-1;flex-direction:row;min-height:58px;gap:10px}
+.sym.none[aria-pressed="true"]{border-color:var(--mint);background:var(--mint-soft)}
+.sym.none[aria-pressed="true"]::after{background:var(--mint)}
+@media (max-width:350px){.sym-grid{grid-template-columns:repeat(2,1fr)}}
+label.lbl{display:block;font-weight:700;font-size:15px;margin:14px 0 6px}
+textarea.field{width:100%;resize:vertical;min-height:72px}
+input.field.wide{width:100%}
+.when{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:15px}
+.save-bar{position:sticky;bottom:calc(84px + env(safe-area-inset-bottom,0px));padding-top:8px;background:linear-gradient(to bottom,transparent,var(--bg) 30%)}
+
+/* history */
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--surface);border:1px solid var(--line);padding:4px;border-radius:16px}
+.seg button{border:0;background:none;padding:10px 4px;border-radius:12px;font-weight:700;font-size:15px;color:var(--muted);min-height:44px}
+.seg button[aria-selected="true"]{background:var(--primary);color:var(--primary-ink)}
+.chart-wrap{overflow-x:auto}
+.chart{width:100%;height:auto;display:block;min-width:300px}
+.chart .band{fill:var(--mint-soft)}
+.chart .bandtxt{fill:var(--mint);font-size:11px;font-weight:700}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .hotline{stroke:var(--hot);stroke-width:1.2;stroke-dasharray:4 4}
+.chart .hottxt{fill:var(--hot);font-size:11px;font-weight:700}
+.chart .axis{fill:var(--muted);font-size:11px;font-family:var(--font-body)}
+.chart .axis.today{fill:var(--ink);font-weight:700}
+.chart .line{fill:none;stroke:var(--primary);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.chart .val{fill:var(--ink);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.chart .pt{stroke:var(--surface);stroke-width:2.5}
+.chart .pt.low{fill:var(--cool)} .chart .pt.ok{fill:var(--mint)} .chart .pt.warm{fill:var(--warm)} .chart .pt.hot{fill:var(--hot)}
+.chart .nodata{fill:var(--muted);font-size:11px}
+
+.day{display:flex;flex-direction:column;gap:10px}
+.day-h{display:flex;align-items:baseline;gap:8px;font-family:var(--font-display);font-size:18px}
+.day-h .muted{font-family:var(--font-body);font-size:13px}
+.rec{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:14px}
+.rec .time{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px;min-width:58px}
+.rec .body{display:flex;flex-direction:column;gap:8px;min-width:0}
+.rec .t{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rec .t b{font-family:var(--font-display);font-weight:400;font-size:24px;font-variant-numeric:tabular-nums}
+.rec .memo{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);display:grid;place-items:center;color:var(--muted)}
+.icon-btn svg{width:18px;height:18px}
+.icon-btn path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.empty{text-align:center;padding:28px 18px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty .e{font-size:40px}
+.sample-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--warm-soft);border-radius:14px;padding:10px 14px;font-size:14px}
+.sample-bar button{border:0;background:var(--surface);border-radius:10px;padding:6px 12px;font-weight:700;font-size:14px;color:var(--warm);white-space:nowrap}
+
+/* guide */
+.howto{display:flex;flex-direction:column;gap:14px;margin:0;padding:0;list-style:none}
+.howto li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start}
+.howto .e{width:44px;height:44px;border-radius:14px;background:var(--primary-soft);display:grid;place-items:center;font-size:22px}
+.howto b{display:block}
+.howto p{font-size:15px;color:var(--muted)}
+.checklist{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.checklist li{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.checklist li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--hot);margin-top:9px;flex:none}
+.callout{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.callout span{background:var(--surface);border-radius:12px;padding:8px 12px;font-size:14px;font-weight:700}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));z-index:10}
+.nav-in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:14px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:700;min-height:58px;justify-content:center}
+.nav svg{width:26px;height:26px}
+.nav svg *{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav a[aria-current="page"]{color:var(--primary);background:var(--primary-soft)}
+
+/* toast + sheet */
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:999px;font-weight:700;font-size:15px;z-index:30;max-width:calc(100% - 32px);text-align:center}
+.backdrop{position:fixed;inset:0;background:rgba(10,25,35,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.sheet{background:var(--surface);border-radius:var(--r-lg);padding:22px;width:100%;max-width:440px;display:flex;flex-direction:column;gap:14px;margin-bottom:env(safe-area-inset-bottom,0px)}
+.storage-warn{margin-bottom:12px}
+@media (prefers-reduced-motion:no-preference){
+  .screen:not([hidden]){animation:rise .25s ease both}
+  @keyframes rise{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+</style>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <span class="cross" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M8 2.5h4a1 1 0 0 1 1 1V7h3.5a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H13v3.5a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V13H3.5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1H7V3.5a1 1 0 0 1 1-1z"/></svg></span>
+      보건실 건강수첩
+    </div>
+    <span class="datechip num" id="todayChip"></span>
+  </div>
+  <div id="storageWarn" class="notice warm storage-warn" hidden><span class="ico">⚠️</span><div><b>기록이 저장되지 않을 수 있어요</b>이 브라우저에서는 저장 공간을 쓸 수 없어요. 창을 닫으면 기록이 사라져요.</div></div>
+
+  <section class="screen" id="screen-home" aria-label="홈"></section>
+  <section class="screen" id="screen-record" aria-label="건강 기록하기" hidden></section>
+  <section class="screen" id="screen-history" aria-label="내 기록" hidden></section>
+  <section class="screen" id="screen-guide" aria-label="도움말" hidden></section>
+</div>
+
+<nav class="nav" aria-label="메뉴">
+  <div class="nav-in">
+    <a href="#home" data-nav="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>홈</a>
+    <a href="#record" data-nav="record"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>기록하기</a>
+    <a href="#history" data-nav="history"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M5 15l4-4 3 3 6-6"/><circle cx="18" cy="8" r="1"/></svg>내 기록</a>
+    <a href="#guide" data-nav="guide"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.01"/></svg>도움말</a>
+  </div>
+</nav>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<div id="modal" class="backdrop" hidden><div class="sheet" role="dialog" aria-modal="true" id="sheet"></div></div>
+
+<script>
+/* ────────────────────────────────────────────────────────────
+ * 데이터 저장 구조
+ * - 건강 기록은 민감한 개인정보이므로 이 기기(브라우저) 안에만 저장합니다.
+ *   서버로 보내지 않고, 이름·학번 같은 신원 정보도 받지 않습니다.
+ * - 저장 형식: { version, records:[{id, ts, temp, symptoms[], other, memo, sample?}] }
+ * - 실제 서비스로 확장할 때는 이 HealthStore 만 서버 저장소로 바꾸면 됩니다.
+ *   그때는 보호자 동의(만 14세 미만), 전송·저장 암호화, 접근 권한 분리(학생 본인/보건교사),
+ *   보관 기간과 자동 파기, 열람·삭제 요청 처리를 함께 설계해야 합니다.
+ * ──────────────────────────────────────────────────────────── */
+const HealthStore = (() => {
+  const KEY = 'health-notebook/v1';
+  let ok = true;
+  const empty = () => ({ version: 1, records: [] });
+  return {
+    get available(){ return ok; },
+    load(){
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return empty();
+        const d = JSON.parse(raw);
+        if (!d || !Array.isArray(d.records)) return empty();
+        d.records = d.records.filter(r => r && typeof r.temp === 'number' && typeof r.ts === 'number');
+        return d;
+      } catch (e) { ok = false; return empty(); }
+    },
+    save(d){
+      try { localStorage.setItem(KEY, JSON.stringify(d)); ok = true; }
+      catch (e) { ok = false; }
+      return ok;
+    }
+  };
+})();
+
+const SYMPTOMS = [
+  { id:'fever',  e:'🤒', t:'발열',       h:'열이 나요' },
+  { id:'runny',  e:'🤧', t:'콧물',       h:'콧물이 나요' },
+  { id:'cough',  e:'😷', t:'기침',       h:'기침을 해요' },
+  { id:'throat', e:'🗣️', t:'목 아픔',    h:'삼킬 때 아파요' },
+  { id:'head',   e:'🤕', t:'두통',       h:'머리가 아파요' },
+  { id:'ache',   e:'💪', t:'몸살·근육통', h:'몸이 쑤셔요' },
+  { id:'chill',  e:'🥶', t:'오한',       h:'춥고 떨려요' },
+  { id:'tired',  e:'😴', t:'피로감',     h:'많이 피곤해요' },
+  { id:'nausea', e:'🤢', t:'메스꺼움',   h:'속이 울렁거려요' },
+  { id:'other',  e:'✏️', t:'기타',       h:'직접 적을게요' },
+];
+const SYM = Object.fromEntries(SYMPTOMS.map(s => [s.id, s]));
+const T_MIN = 34.0, T_MAX = 42.0;
+
+let data = HealthStore.load();
+let historyFilter = 'week';
+let draft = newDraft();
+
+/* ── helpers ── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const WD = '일월화수목금토';
+const dayKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const keyToDate = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const fmtDate = d => `${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})`;
+const fmtTime = d => { const h = d.getHours(); return `${h < 12 ? '오전' : '오후'} ${h % 12 || 12}:${pad(d.getMinutes())}`; };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const fmtT = t => t.toFixed(1);
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+
+function level(t){
+  if (t < 35.5) return { k:'low',  label:'낮게 나왔어요' };
+  if (t < 37.5) return { k:'ok',   label:'보통이에요' };
+  if (t < 38.0) return { k:'warm', label:'조금 높아요' };
+  return { k:'hot', label:'높아요' };
+}
+function newDraft(){
+  const last = data.records[data.records.length - 1];
+  return { temp: last && !last.sample ? last.temp : 36.5, symptoms: new Set(), other:'', memo:'', ts:null, error:'' };
+}
+function recordsOn(key){ return data.records.filter(r => dayKey(new Date(r.ts)) === key).sort((a,b) => b.ts - a.ts); }
+function dayMax(key){ const rs = recordsOn(key); return rs.length ? Math.max(...rs.map(r => r.temp)) : null; }
+function last7(){
+  const today = new Date();
+  return Array.from({ length:7 }, (_, i) => {
+    const d = addDays(today, i - 6), k = dayKey(d);
+    return { k, d, t: dayMax(k), isToday: i === 6 };
+  });
+}
+function symptomChips(r){
+  if (!r.symptoms.length) return `<span class="chip">😊 아픈 곳 없음</span>`;
+  return r.symptoms.map(id => {
+    const s = SYM[id]; if (!s) return '';
+    const name = id === 'other' && r.other ? r.other : s.t;
+    return `<span class="chip">${s.e} ${esc(name)}</span>`;
+  }).join('');
+}
+function adviceFor(r){
+  const n = r.symptoms.length;
+  if (r.temp >= 38) return { cls:'hot', ico:'🧑‍⚕️', b:'체온이 38℃ 이상이에요', p:'혼자 참지 말고 보호자나 보건 선생님께 바로 알려 주세요.' };
+  if (r.temp < 35.5) return { cls:'cool', ico:'🌡️', b:'체온이 낮게 나왔어요', p:'체온계를 바르게 대고 한 번 더 재 보세요. 춥거나 몸이 안 좋으면 어른께 알려 주세요.' };
+  if (r.temp >= 37.5) return { cls:'warm', ico:'🛌', b:'체온이 조금 높아요', p:'물을 마시고 쉬면서 1~2시간 뒤에 다시 재 보세요.' };
+  if (n >= 3) return { cls:'warm', ico:'💬', b:'불편한 곳이 여러 군데예요', p:'보호자나 보건 선생님께 지금 몸 상태를 이야기해 보세요.' };
+  return null;
+}
+function noticeHTML(a){ return a ? `<div class="notice ${a.cls}"><span class="ico">${a.ico}</span><div><b>${a.b}</b>${a.p}</div></div>` : ''; }
+function sampleBar(){
+  return data.records.some(r => r.sample)
+    ? `<div class="sample-bar"><span>지금 보이는 건 <b>예시 기록</b>이에요.</span><button data-act="clear-sample">예시 지우기</button></div>` : '';
+}
+function persist(){ HealthStore.save(data); $('#storageWarn').hidden = HealthStore.available; }
+
+const crossSVG = `<svg class="bgcross" viewBox="0 0 20 20" aria-hidden="true"><path d="M8 2.5h4a1 1 0 0 1 1 1V7h3.5a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H13v3.5a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V13H3.5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1H7V3.5a1 1 0 0 1 1-1z"/></svg>`;
+const trashSVG = `<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>`;
+
+/* ── 홈 ── */
+function renderHome(){
+  const todayKey = dayKey(new Date());
+  const todays = recordsOn(todayKey);
+  const latest = todays[0];
+  const days = last7();
+  const filled = days.filter(d => d.t !== null).length;
+  let todayCard;
+  if (!latest){
+    todayCard = `
+      <div class="card today">${crossSVG}
+        <div class="today-inner">
+          <div class="status-line"><span class="dot bg-none"></span><span class="muted">오늘은 아직 기록하지 않았어요</span></div>
+          <div>
+            <h2>체온을 재고, 불편한 곳을 골라 주세요</h2>
+            <p class="muted" style="margin-top:4px">1분이면 끝나요.</p>
+          </div>
+          <button class="btn btn-primary" data-go="record"><span class="plus">＋</span>오늘 건강 기록하기</button>
+        </div>
+      </div>`;
+  } else {
+    const lv = level(latest.temp);
+    todayCard = `
+      <div class="card today">${crossSVG}
+        <div class="today-inner">
+          <div class="status-line"><span class="dot bg-ok"></span>오늘 기록 완료 · <span class="muted num">${fmtTime(new Date(latest.ts))}</span></div>
+          <div class="temprow">
+            <div class="bignum">${fmtT(latest.temp)}<small>℃</small></div>
+            <span class="pill lv-${lv.k}" style="margin-bottom:6px">${lv.label}</span>
+          </div>
+          <div class="chips">${symptomChips(latest)}</div>
+          ${noticeHTML(adviceFor(latest))}
+          <button class="btn btn-soft btn-sm" data-go="record">＋ 한 번 더 기록하기</button>
+          ${todays.length > 1 ? `<p class="muted" style="font-size:14px">오늘 ${todays.length}번 기록했어요.</p>` : ''}
+        </div>
+      </div>`;
+  }
+  $('#screen-home').innerHTML = `
+    <div class="stack">
+      <div class="hello">
+        <h1>오늘 몸 상태는 어때요?</h1>
+        <p>매일 체온과 증상을 적어 두면 내 몸의 변화를 알 수 있어요.</p>
+      </div>
+      ${todayCard}
+      <div class="card stack" style="gap:14px">
+        <div class="section-head"><h3>최근 7일</h3><button class="link" data-go="history">내 기록 보기 →</button></div>
+        ${sampleBar()}
+        <div class="strip">
+          ${days.map(d => {
+            const lv = d.t === null ? 'none' : level(d.t).k;
+            return `<div class="d ${d.isToday ? 'is-today' : ''}">
+              <span class="ball bg-${lv}" title="${fmtDate(d.d)}">${d.t === null ? '–' : fmtT(d.t)}</span>
+              <span>${d.isToday ? '오늘' : WD[d.d.getDay()]}</span></div>`;
+          }).join('')}
+        </div>
+        <div class="legend">
+          <span><i class="dot bg-ok"></i>보통</span><span><i class="dot bg-warm"></i>조금 높음</span>
+          <span><i class="dot bg-hot"></i>높음</span><span><i class="dot bg-low"></i>낮음</span>
+        </div>
+        <p class="muted" style="font-size:14px">${filled ? `7일 중 <b>${filled}일</b> 기록했어요. 하루 중 가장 높은 체온을 보여 줘요.` : `아직 기록이 없어요. <button class="link" data-act="load-sample" style="padding:0">예시로 둘러보기</button>`}</p>
+      </div>
+    </div>`;
+}
+
+/* ── 기록하기 ── */
+function renderRecord(){
+  const t = draft.temp, lv = level(t);
+  const when = draft.ts ? new Date(draft.ts) : new Date();
+  const sel = draft.symptoms;
+  const noneOn = sel.size === 0 && !!draft.noneChosen;
+  $('#screen-record').innerHTML = `
+    <div class="stack">
+      <div class="hello"><h1>오늘 건강 기록하기</h1><p>두 가지만 알려 주세요.</p></div>
+
+      <div class="card">
+        <div class="step"><span class="n">1</span><h2>체온이 몇 도예요?</h2></div>
+        <div class="thermo">
+          <button class="round" data-act="temp-down" aria-label="0.1도 내리기">−</button>
+          <div class="thermo-val">
+            <div class="bignum" id="tempBig" aria-live="polite">${fmtT(t)}<small>℃</small></div>
+            <span class="pill lv-${lv.k}" id="tempPill">${lv.label}</span>
+          </div>
+          <button class="round" data-act="temp-up" aria-label="0.1도 올리기">＋</button>
+        </div>
+        <input type="range" id="tempRange" min="35" max="41" step="0.1" value="${Math.min(41, Math.max(35, t))}" aria-label="체온 조절">
+        <div class="scale"><span>35℃</span><span>37℃</span><span>39℃</span><span>41℃</span></div>
+        <div class="direct">
+          <label for="tempInput">숫자로 직접 쓰기</label>
+          <input class="field" id="tempInput" type="number" inputmode="decimal" step="0.1" min="${T_MIN}" max="${T_MAX}" value="${fmtT(t)}">
+          <span>℃</span>
+        </div>
+        <div class="err" id="tempErr" ${draft.error ? '' : 'hidden'}>${esc(draft.error)}</div>
+      </div>
+
+      <div class="card">
+        <div class="step"><span class="n">2</span><h2>지금 불편한 곳이 있나요?</h2></div>
+        <p class="muted" style="font-size:14px;margin:-6px 0 12px">해당하는 것을 모두 눌러 주세요.</p>
+        <div class="sym-grid">
+          <button class="sym none" data-sym="none" aria-pressed="${noneOn}"><span class="e">😊</span><span class="t">아픈 곳 없어요</span></button>
+          ${SYMPTOMS.map(s => `<button class="sym" data-sym="${s.id}" aria-pressed="${sel.has(s.id)}"><span class="e">${s.e}</span><span class="t">${s.t}</span><span class="h">${s.h}</span></button>`).join('')}
+        </div>
+        <div id="otherWrap" ${sel.has('other') ? '' : 'hidden'}>
+          <label class="lbl" for="otherInput">기타 증상</label>
+          <input class="field wide" id="otherInput" maxlength="30" placeholder="예: 배가 아파요" value="${esc(draft.other)}">
+        </div>
+        <label class="lbl" for="memoInput">메모 <span class="muted" style="font-weight:400">(쓰지 않아도 돼요)</span></label>
+        <textarea class="field" id="memoInput" maxlength="100" placeholder="예: 아침에 약을 먹었어요">${esc(draft.memo)}</textarea>
+      </div>
+
+      <div class="card-flat when">
+        <span>🕒 <b class="num">${fmtDate(when)} ${fmtTime(when)}</b> 기록</span>
+        <button class="link" data-act="toggle-when">시간 바꾸기</button>
+        <input class="field wide" type="datetime-local" id="whenInput" hidden aria-label="기록 시간"
+          value="${when.getFullYear()}-${pad(when.getMonth()+1)}-${pad(when.getDate())}T${pad(when.getHours())}:${pad(when.getMinutes())}">
+      </div>
+
+      <div class="save-bar"><button class="btn btn-primary" data-act="save">✓ 기록 저장하기</button></div>
+    </div>`;
+}
+function setTemp(v, fromInput){
+  if (isNaN(v)) return;
+  v = Math.round(v * 10) / 10;
+  draft.temp = v;
+  const inRange = v >= T_MIN && v <= T_MAX;
+  const lv = level(v);
+  $('#tempBig').innerHTML = `${fmtT(v)}<small>℃</small>`;
+  const pill = $('#tempPill'); pill.className = `pill lv-${lv.k}`; pill.textContent = lv.label;
+  $('#tempRange').value = Math.min(41, Math.max(35, v));
+  if (!fromInput) $('#tempInput').value = fmtT(v);
+  draft.error = inRange ? '' : `체온은 ${T_MIN.toFixed(1)}℃에서 ${T_MAX.toFixed(1)}℃ 사이로 써 주세요.`;
+  const e = $('#tempErr'); e.textContent = draft.error; e.hidden = !draft.error;
+}
+function saveRecord(){
+  const t = draft.temp;
+  if (isNaN(t) || t < T_MIN || t > T_MAX){ setTemp(t); $('#tempInput').focus(); return; }
+  data.records = data.records.filter(r => !r.sample);
+  const symptoms = SYMPTOMS.map(s => s.id).filter(id => draft.symptoms.has(id));
+  const rec = { id: uid(), ts: draft.ts || Date.now(), temp: Math.round(t*10)/10, symptoms,
+    other: symptoms.includes('other') ? draft.other.trim().slice(0, 30) : '', memo: draft.memo.trim().slice(0, 100) };
+  data.records.push(rec);
+  data.records.sort((a, b) => a.ts - b.ts);
+  persist();
+  draft = newDraft();
+  toast(HealthStore.available ? '기록을 저장했어요 ✓' : '기록했어요 (이 창을 닫으면 사라져요)');
+  go('home');
+}
+
+/* ── 내 기록 ── */
+function chartSVG(days){
+  const W = 340, H = 210, L = 34, R = 14, T = 26, B = 40;
+  const vals = days.map(d => d.t).filter(v => v !== null);
+  const lo = Math.min(35.5, Math.floor(((vals.length ? Math.min(...vals) : 36) - 0.3) * 2) / 2);
+  const hi = Math.max(39.0, Math.ceil(((vals.length ? Math.max(...vals) : 37) + 0.4) * 2) / 2);
+  const y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+  const x = i => L + i * (W - L - R) / 6;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="최근 7일 체온 그래프">`;
+  s += `<rect class="band" x="${L}" y="${y(37.4)}" width="${W-L-R}" height="${y(36.0)-y(37.4)}" rx="6"/>`;
+  s += `<text class="bandtxt" x="${W-R-4}" y="${y(36.0)-6}" text-anchor="end">보통 범위</text>`;
+  for (let v = Math.ceil(lo); v <= hi; v++){
+    s += `<line class="grid" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}°</text>`;
+  }
+  s += `<line class="hotline" x1="${L}" x2="${W-R}" y1="${y(38)}" y2="${y(38)}"/><text class="hottxt" x="${L+4}" y="${y(38)-5}">38℃</text>`;
+  let seg = [];
+  const segs = [];
+  days.forEach((d, i) => { if (d.t !== null) seg.push(`${x(i)},${y(d.t)}`); else if (seg.length){ segs.push(seg); seg = []; } });
+  if (seg.length) segs.push(seg);
+  segs.filter(g => g.length > 1).forEach(g => s += `<polyline class="line" points="${g.join(' ')}"/>`);
+  days.forEach((d, i) => {
+    const lx = x(i);
+    s += `<text class="axis ${d.isToday ? 'today' : ''}" x="${lx}" y="${H-22}" text-anchor="middle">${d.isToday ? '오늘' : WD[d.d.getDay()]}</text>`;
+    s += `<text class="axis ${d.isToday ? 'today' : ''}" x="${lx}" y="${H-7}" text-anchor="middle">${d.d.getMonth()+1}/${d.d.getDate()}</text>`;
+    if (d.t === null) { s += `<text class="nodata" x="${lx}" y="${y(36.7)+4}" text-anchor="middle">–</text>`; return; }
+    s += `<circle class="pt ${level(d.t).k}" cx="${lx}" cy="${y(d.t)}" r="6"/>`;
+    s += `<text class="val" x="${lx}" y="${y(d.t)-11}" text-anchor="middle">${fmtT(d.t)}</text>`;
+  });
+  return s + `</svg>`;
+}
+function renderHistory(){
+  const today = new Date();
+  const keys = {
+    today: [dayKey(today)],
+    yesterday: [dayKey(addDays(today, -1))],
+    week: Array.from({ length:7 }, (_, i) => dayKey(addDays(today, -i))),
+  };
+  let groupKeys = historyFilter === 'all'
+    ? [...new Set(data.records.map(r => dayKey(new Date(r.ts))))].sort().reverse()
+    : keys[historyFilter];
+  const groups = groupKeys.map(k => ({ k, rs: recordsOn(k) })).filter(g => g.rs.length);
+  const tabs = [['today','오늘'],['yesterday','어제'],['week','최근 7일'],['all','전체']];
+  const emptyMsg = { today:'오늘은 아직 기록이 없어요.', yesterday:'어제는 기록이 없어요.', week:'최근 7일 동안 기록이 없어요.', all:'아직 기록이 없어요.' }[historyFilter];
+  $('#screen-history').innerHTML = `
+    <div class="stack">
+      <div class="hello"><h1>내 건강 기록</h1><p>날짜별 체온과 증상을 확인해요.</p></div>
+      ${sampleBar()}
+      <div class="card">
+        <div class="section-head" style="margin-bottom:6px"><h3>최근 7일 체온 변화</h3></div>
+        <p class="muted" style="font-size:13px;margin-bottom:8px">하루 중 가장 높은 체온을 이었어요.</p>
+        <div class="chart-wrap">${chartSVG(last7())}</div>
+      </div>
+      <div class="seg" role="tablist" aria-label="기간 선택">
+        ${tabs.map(([k, l]) => `<button role="tab" data-filter="${k}" aria-selected="${historyFilter === k}">${l}</button>`).join('')}
+      </div>
+      ${groups.length ? groups.map(g => {
+        const d = keyToDate(g.k), isT = g.k === dayKey(today), isY = g.k === dayKey(addDays(today, -1));
+        return `<div class="day">
+          <div class="day-h">${fmtDate(d)} <span class="muted">${isT ? '오늘' : isY ? '어제' : ''} · ${g.rs.length}번 기록</span></div>
+          ${g.rs.map(r => { const lv = level(r.temp); return `
+            <div class="rec">
+              <span class="time">${fmtTime(new Date(r.ts))}</span>
+              <div class="body">
+                <div class="t"><b>${fmtT(r.temp)}℃</b><span class="pill lv-${lv.k}">${lv.label}</span></div>
+                <div class="chips">${symptomChips(r)}</div>
+                ${r.memo ? `<p class="memo">📝 ${esc(r.memo)}</p>` : ''}
+              </div>
+              <button class="icon-btn" data-del="${esc(r.id)}" aria-label="${fmtTime(new Date(r.ts))} 기록 지우기">${trashSVG}</button>
+            </div>`; }).join('')}
+        </div>`;
+      }).join('') : `
+        <div class="card empty">
+          <span class="e">📒</span>
+          <h3>${emptyMsg}</h3>
+          <p class="muted" style="font-size:15px">체온을 재고 기록하면 여기에 날짜별로 모여요.</p>
+          <button class="btn btn-primary btn-sm" data-go="record" style="max-width:280px">＋ 지금 기록하기</button>
+          ${data.records.length ? '' : `<button class="link" data-act="load-sample">예시로 둘러보기</button>`}
+        </div>`}
+    </div>`;
+}
+
+/* ── 도움말 ── */
+function renderGuide(){
+  $('#screen-guide').innerHTML = `
+    <div class="stack">
+      <div class="hello"><h1>이렇게 기록해요</h1><p>매일 같은 시간에 기록하면 변화를 알기 쉬워요.</p></div>
+      <div class="card">
+        <ol class="howto">
+          <li><span class="e">🌡️</span><div><b>체온 재기</b><p>체온계로 체온을 재요. 밥 먹거나 운동한 직후에는 30분쯤 쉬었다가 재요.</p></div></li>
+          <li><span class="e">🔢</span><div><b>숫자 넣기</b><p>＋ − 버튼이나 막대로 맞추거나, 숫자를 직접 써요.</p></div></li>
+          <li><span class="e">👆</span><div><b>불편한 곳 고르기</b><p>지금 느끼는 것을 모두 눌러요. 괜찮으면 '아픈 곳 없어요'를 눌러요.</p></div></li>
+          <li><span class="e">✅</span><div><b>저장하기</b><p>저장하면 '내 기록'에서 날짜별로 다시 볼 수 있어요.</p></div></li>
+        </ol>
+      </div>
+      <div class="card" style="background:var(--hot-soft);box-shadow:none">
+        <h2>이럴 땐 꼭 어른께 알려요</h2>
+        <ul class="checklist">
+          <li>체온이 38℃ 이상일 때</li>
+          <li>숨쉬기가 힘들거나 가슴이 아플 때</li>
+          <li>머리가 아주 심하게 아프거나 계속 토할 때</li>
+          <li>열이나 증상이 며칠째 나아지지 않을 때</li>
+          <li>평소와 다르게 많이 힘들고 걱정될 때</li>
+        </ul>
+        <div class="callout"><span>👨‍👩‍👧 보호자</span><span>🏫 보건 선생님</span><span>🏥 병원</span><span>🚑 위급하면 119</span></div>
+      </div>
+      <div class="notice info"><span class="ico">ℹ️</span><div><b>이 앱은 병을 알려 주지 않아요</b>내 몸 상태를 적어 두는 기록장이에요. 어떤 병인지는 의사 선생님이 진찰해야 알 수 있어요.</div></div>
+      <div class="card stack" style="gap:12px">
+        <h3>🔒 내 기록 지키기</h3>
+        <p class="muted" style="font-size:15px">기록은 <b>지금 쓰는 이 기기 안에만</b> 저장되고 어디로도 보내지지 않아요. 이름이나 학번도 묻지 않아요. 브라우저 기록을 지우면 건강 기록도 함께 지워져요.</p>
+        <div class="btn-row">
+          <button class="btn btn-ghost btn-sm" data-act="export">기록 복사하기</button>
+          <button class="btn btn-ghost btn-sm" data-act="import">기록 불러오기</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" data-act="wipe" style="color:var(--hot)">모든 기록 지우기</button>
+      </div>
+    </div>`;
+}
+
+/* ── 공용: 토스트, 시트 ── */
+let toastTimer;
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.hidden = true, 2400); }
+function openSheet(html){ $('#sheet').innerHTML = html; $('#modal').hidden = false; const f = $('#sheet').querySelector('button,textarea'); if (f) f.focus(); }
+function closeSheet(){ $('#modal').hidden = true; $('#sheet').innerHTML = ''; }
+function confirmSheet(title, body, okLabel, onOk){
+  openSheet(`<h2>${title}</h2><p class="muted">${body}</p>
+    <div class="btn-row"><button class="btn btn-ghost btn-sm" data-sheet="cancel">취소</button><button class="btn btn-danger btn-sm" data-sheet="ok">${okLabel}</button></div>`);
+  sheetOk = onOk;
+}
+let sheetOk = null;
+
+function loadSample(){
+  const now = new Date();
+  const plan = [ [6, 36.6, []], [5, 36.8, ['tired']], [4, 37.6, ['runny','throat']], [3, 38.2, ['fever','head','chill']],
+                 [2, 37.8, ['cough','tired']], [1, 36.9, ['cough']] ];
+  plan.forEach(([ago, temp, symptoms]) => {
+    const d = addDays(now, -ago); d.setHours(7, 40 + ago, 0, 0);
+    data.records.push({ id: uid(), ts: d.getTime(), temp, symptoms, other:'', memo:'', sample:true });
+  });
+  data.records.sort((a, b) => a.ts - b.ts);
+  persist(); render(); toast('예시 기록을 넣었어요');
+}
+
+/* ── 화면 전환 ── */
+const SCREENS = ['home','record','history','guide'];
+let current = 'home';
+function go(name){ if (location.hash !== '#' + name) location.hash = name; else route(); }
+function route(){
+  const h = location.hash.replace('#', '');
+  current = SCREENS.includes(h) ? h : 'home';
+  render();
+  window.scrollTo(0, 0);
+}
+function render(){
+  const now = new Date();
+  $('#todayChip').textContent = fmtDate(now);
+  SCREENS.forEach(s => $('#screen-' + s).hidden = s !== current);
+  document.querySelectorAll('[data-nav]').forEach(a => a.dataset.nav === current ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  ({ home: renderHome, record: renderRecord, history: renderHistory, guide: renderGuide })[current]();
+}
+
+/* ── 이벤트 ── */
+document.addEventListener('click', e => {
+  const el = e.target.closest('button,[data-go]'); if (!el) return;
+  if (el.dataset.go) { if (el.dataset.go === 'record') draft = newDraft(); go(el.dataset.go); return; }
+  if (el.dataset.sym){
+    const id = el.dataset.sym;
+    if (id === 'none'){ draft.symptoms.clear(); draft.noneChosen = true; }
+    else { draft.noneChosen = false; draft.symptoms.has(id) ? draft.symptoms.delete(id) : draft.symptoms.add(id); }
+    document.querySelectorAll('[data-sym]').forEach(b => b.setAttribute('aria-pressed',
+      b.dataset.sym === 'none' ? String(draft.noneChosen && draft.symptoms.size === 0) : String(draft.symptoms.has(b.dataset.sym))));
+    $('#otherWrap').hidden = !draft.symptoms.has('other');
+    if (id === 'other' && draft.symptoms.has('other')) $('#otherInput').focus();
+    return;
+  }
+  if (el.dataset.filter){ historyFilter = el.dataset.filter; renderHistory(); return; }
+  if (el.dataset.del){
+    const id = el.dataset.del;
+    confirmSheet('이 기록을 지울까요?', '지운 기록은 다시 되돌릴 수 없어요.', '지우기', () => {
+      data.records = data.records.filter(r => r.id !== id); persist(); renderHistory(); toast('기록을 지웠어요');
+    });
+    return;
+  }
+  if (el.dataset.sheet){
+    if (el.dataset.sheet === 'ok' && sheetOk) sheetOk();
+    if (el.dataset.sheet === 'import-ok'){
+      try {
+        const d = JSON.parse($('#importText').value);
+        if (!d || !Array.isArray(d.records)) throw 0;
+        const have = new Set(data.records.map(r => r.id));
+        const add = d.records.filter(r => r && r.id && typeof r.temp === 'number' && typeof r.ts === 'number' && !have.has(r.id))
+          .map(r => ({ id:String(r.id), ts:r.ts, temp:r.temp, symptoms:Array.isArray(r.symptoms) ? r.symptoms.filter(s => SYM[s]) : [],
+                       other:String(r.other || '').slice(0, 30), memo:String(r.memo || '').slice(0, 100) }));
+        data.records = data.records.filter(r => !r.sample).concat(add).sort((a, b) => a.ts - b.ts);
+        persist(); closeSheet(); render(); toast(`기록 ${add.length}개를 불러왔어요`);
+      } catch (err) { $('#importErr').hidden = false; }
+      return;
+    }
+    sheetOk = null; closeSheet(); return;
+  }
+  switch (el.dataset.act){
+    case 'temp-up': setTemp(Math.min(T_MAX, (isNaN(draft.temp) ? 36.5 : draft.temp) + 0.1)); break;
+    case 'temp-down': setTemp(Math.max(T_MIN, (isNaN(draft.temp) ? 36.5 : draft.temp) - 0.1)); break;
+    case 'toggle-when': { const w = $('#whenInput'); w.hidden = !w.hidden; if (!w.hidden) w.focus(); break; }
+    case 'save': saveRecord(); break;
+    case 'load-sample': loadSample(); break;
+    case 'clear-sample': data.records = data.records.filter(r => !r.sample); persist(); render(); toast('예시 기록을 지웠어요'); break;
+    case 'wipe': confirmSheet('모든 기록을 지울까요?', '이 기기에 저장된 체온과 증상 기록이 모두 사라지고 되돌릴 수 없어요.', '모두 지우기', () => {
+      data.records = []; persist(); render(); toast('모든 기록을 지웠어요'); }); break;
+    case 'export': {
+      const text = JSON.stringify({ version:1, records:data.records.filter(r => !r.sample) });
+      const fallback = () => { openSheet(`<h2>기록 복사하기</h2><p class="muted" style="font-size:14px">아래 글자를 모두 선택해서 복사해 두세요. 다른 기기의 '기록 불러오기'에 붙여 넣으면 옮길 수 있어요.</p>
+        <textarea class="field mono" id="exportText" rows="6" readonly>${esc(text)}</textarea>
+        <button class="btn btn-ghost btn-sm" data-sheet="cancel">닫기</button>`); const t = $('#exportText'); t.focus(); t.select(); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => toast('기록을 복사했어요. 안전한 곳에 붙여 넣어 두세요'), fallback);
+      else fallback();
+      break;
+    }
+    case 'import':
+      openSheet(`<h2>기록 불러오기</h2><p class="muted" style="font-size:14px">'기록 복사하기'로 복사한 글자를 붙여 넣어 주세요. 이미 있는 기록은 그대로 두고 새 기록만 더해요.</p>
+        <textarea class="field mono" id="importText" rows="6" placeholder='{"version":1,"records":[...]}'></textarea>
+        <p class="err" id="importErr" hidden>읽을 수 없는 내용이에요. 복사한 글자를 빠짐없이 붙여 넣었는지 확인해 주세요.</p>
+        <div class="btn-row"><button class="btn btn-ghost btn-sm" data-sheet="cancel">취소</button><button class="btn btn-primary btn-sm" data-sheet="import-ok">불러오기</button></div>`);
+      break;
+  }
+});
+document.addEventListener('input', e => {
+  const id = e.target.id;
+  if (id === 'tempRange') setTemp(parseFloat(e.target.value));
+  else if (id === 'tempInput') setTemp(parseFloat(e.target.value), true);
+  else if (id === 'otherInput') draft.other = e.target.value;
+  else if (id === 'memoInput') draft.memo = e.target.value;
+});
+document.addEventListener('change', e => {
+  if (e.target.id !== 'whenInput') return;
+  const v = new Date(e.target.value);
+  if (!isNaN(v)) { draft.ts = Math.min(v.getTime(), Date.now()); renderRecordKeepWhen(); }
+});
+function renderRecordKeepWhen(){ renderRecord(); $('#whenInput').hidden = false; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeSheet(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modal').hidden) closeSheet(); });
+window.addEventListener('hashchange', route);
+
+$('#storageWarn').hidden = HealthStore.available;
+route();
+</script>
